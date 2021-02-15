@@ -10,7 +10,7 @@ from skimage.color import rgb2gray
 from scipy.spatial import distance
 
 
-class create_iamges_for_DataSet:
+class create_images_for_DataSet:
     def __init__(self, path):
         self.__path = path
 

@@ -1,18 +1,10 @@
 from calculateCfosIntensity import CalculateCfosIntensity
-from create_image_for_DataSet import create_iamges_for_DataSet
-from csv_section_initialize import Initialize_CSV_Files
-from getCSVbyBregma import separatePointCSVfile
-from export_region_csv import Export_Region_CSV
-from separate_dorsal_ventral_hippocampus import separate_dorsal_ventral_hippocmapus
-from separate_regions import Separate_Regions
-from Dentate_Corpose import Create_csv_Dantate_Corpose
+# from create_image_for_DataSet import create_iamges_for_DataSet
+from Initialyze.csv_section_initialize import Initialize_CSV_Files
 import os
 import threading
-import pandas as pn
-from one_side import One_Side
-from cfos_count import Cfos_Count
-from drop_distrebutions import Drop_Distrebutions
-from filterByBlobDetect import filterCellByBlobDetection
+from Filters.filterByBlobDetect import filterCellByBlobDetection
+from create_image_for_DataSet import create_images_for_DataSet
 
 
 def initcsvFile(path, fileName, no_fit_list):
@@ -82,7 +74,7 @@ def multi_thread_blob_filter(path):
 def action_multi_checking(path,image,data):
     filterCellByBlobDetection(path, image, data).action()
 
-path = r'D:\engram\New_Converted_Folder\N3\1h\csv files'
+path = r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files'
 
 """-----------------------"""
 
@@ -101,7 +93,7 @@ path = r'D:\engram\New_Converted_Folder\N3\1h\csv files'
 
 """-----------------------"""
 
-# separatePointCSVfile(path,'all_channels_1h_N3_points_withNames.csv').separate_2('NeuN_Background.csv')
+# separatePointCSVfile(path,'1h_n2_points_withNames.csv').separate()
 # separatePointCSVfile(path+"\\separate files").merge()
 
 """------------------"""
@@ -118,7 +110,7 @@ path = r'D:\engram\New_Converted_Folder\N3\1h\csv files'
 
 
 """----------------"""
-# One_Side(path + "\\separate files").action(['-1455.csv','-3655.csv'], 2)
+# One_Side(path + "\\separate files").action(['-4055.csv'], 2)
 """---------------"""
 
 # Cfos_Count(path+"\\result", "points.csv").action_2(1.5)
@@ -133,4 +125,4 @@ path = r'D:\engram\New_Converted_Folder\N3\1h\csv files'
 # multi_thread_blob_filter(path+"\\separate files")
 # filterCellByBlobDetection(r'C:\Users\owner\Desktop\New folder', '-3155.jp2', '-3155.csv').action()
 
-create_iamges_for_DataSet(r'D:\engram\New_Converted_Folder\N2\1h\csv files\separate files').action()
+create_images_for_DataSet(r'D:\engram\New_Converted_Folder\N2\1h\csv files\separate files').action()

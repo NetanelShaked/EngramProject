@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pn
 import xml.etree.ElementTree as ET
-from export_region_csv import Export_Region_CSV
 
 
 class Point:
