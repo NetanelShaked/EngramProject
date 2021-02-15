@@ -3,17 +3,13 @@ import matplotlib.patches as ptc
 from PIL import Image
 import numpy as np
 from math import sqrt
-from skimage import data
 from skimage.feature import blob_dog, blob_log, blob_doh
 from skimage.color import rgb2gray
-import pandas as pn
-from skimage import data
 from skimage import filters
-from skimage import exposure
 Image.MAX_IMAGE_PIXELS = 275727232
 
 image = plt.imread(
-    r'C:\Users\shako\Desktop\מעבדה\145.jp2')
+    r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\6h\single images\other format\6h_N2_other_format_Section0001_Slide001_Contour001.jp2')
 # data=pn.read_csv(r'D:\engram\New_Converted_Folder\N3\1h\csv files\separate files\1345.csv')
 
 x_pixel = 3469
