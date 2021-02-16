@@ -66,7 +66,8 @@ def decision(image, x_coordinate, y_coordinate, distance):
         local_image_cfos = local_image_matrix[:, :, 1]
         mean = local_image_cfos.mean()
         std = local_image_cfos.std()
-        if pixel_value[1] > mean + 2 * std:
+        threshold=mean + 4 * std
+        if pixel_value[1] > threshold:
             return True
         return False
 
