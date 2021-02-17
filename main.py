@@ -125,4 +125,4 @@ path = r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files'
 # multi_thread_blob_filter(path+"\\separate files")
 # filterCellByBlobDetection(r'C:\Users\owner\Desktop\New folder', '-3155.jp2', '-3155.csv').action()
 
-create_images_for_DataSet(r'D:\engram\New_Converted_Folder\N2\1h\csv files\separate files').action()
+# create_images_for_DataSet(r'D:\engram\New_Converted_Folder\N2\1h\csv files\separate files').action()

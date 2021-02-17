@@ -37,7 +37,7 @@ def handle_df(data):
     """
     image = data[0]
     df = data[1]
-    return df.T.apply(lambda row: decision(image, int(row['x']), int(abs(row['y'])), 200))
+    return df.T.apply(lambda row: decision(image, int(row['x']), int(abs(row['y'])), 800))
 
 
 def filter_NeuN_by_background(path, jp2_name, csv_name):
@@ -55,7 +55,11 @@ def filter_NeuN_by_background(path, jp2_name, csv_name):
 
     csv = csv[csv['relevant']]
     del csv['relevant']
-    csv.to_csv(os.path.join(path, csv_name[:-4] + "_new.csv"), index=False)
+    try:
+        os.mkdir(os.path.join(path, "NeunFilter"))
+    except FileExistsError:
+        pass
+    csv.to_csv(os.path.join(os.path.join(path, "NeunFilter"), csv_name), index=False)
 
 
 def decision(image, x_coordinate, y_coordinate, distance):
@@ -73,7 +77,7 @@ def decision(image, x_coordinate, y_coordinate, distance):
     local_image_matrix_one_channel = local_image_matrix[:, :, channel]
     limit = otsu(local_image_matrix_one_channel)
     pixel_value = image[y_coordinate, x_coordinate]
-    if pixel_value[channel] >= limit:
+    if pixel_value[channel] > limit:
         return True
     else:
         # if pixel value is smaller then the background value calculate by otsu
@@ -81,18 +85,28 @@ def decision(image, x_coordinate, y_coordinate, distance):
         # we looking for c-fos so if cfos value (channel3) is bigger then mean+4*std of channel3 intensity
         # in local area we keep this coordinates
 
-        local_image_cfos = local_image_matrix[:, :, 1]
-        mean = local_image_cfos.mean()
-        std = local_image_cfos.std()
-        threshold = mean + 4 * std
-        if pixel_value[1] > threshold:
-            return True
+        # local_image_cfos = local_image_matrix[:, :, 1]
+        # mean = local_image_cfos.mean()
+        # std = local_image_cfos.std()
+        # threshold = mean + 4 * std
+        # if pixel_value[1] > threshold:
+        #     return True
         return False
 
+def getmasho(image,dataFrame,distance):
+    interest_region=pd.DataFrame(dataFrame[dataFrame['region']=='Hippocampal region'])
+    # for row in interest_region.iterrows():
+    threshold=interest_region.T.apply(lambda row: otsu(image[int(abs(row['y'])) - distance:int(abs(row['y'])) + distance,
+                         int(row['x']) - distance:int(row['x']) + distance, 0]))
+    return threshold.mean()
 
 if __name__ == '__main__':
-    # path = r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files'
-    # jp2 = '-3055.jp2'
-    # csv = '-3055.csv'
-    # filter_by_background(path, jp2, csv)
-    apply_action_on_path(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files')
+    path = r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files'
+    jp2 = '-2855.jp2'
+    csv = '-2855.csv'
+    Image.MAX_IMAGE_PIXELS=10**9
+    # filter_NeuN_by_background(path, jp2, csv)
+    image=plt.imread(os.path.join(path,jp2))
+    dataFrame=pd.read_csv(os.path.join(path,csv))
+    print (getmasho(image,dataFrame,500))
+    # apply_action_on_path(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files')

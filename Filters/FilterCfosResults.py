@@ -9,6 +9,7 @@ import numpy as np
 import os
 import cv2
 from skimage.measure import label, regionprops
+import matplotlib.patches as ptc
 
 
 def exportPanelResults(image, csv):
@@ -23,14 +24,18 @@ def exportPanelResults(image, csv):
     images = []
     plt.figure(figsize=(100, 100))
     plotsize = int((numberOfNucles ** 0.5) + 1)
-    distance = 100
+    distance = 300
     for idx, row in csv.iterrows():
         x_pixel = int(row['x'])
         y_pixel = int(abs(row['y']))
         plt.subplot(plotsize, plotsize, idx + 1)
         plt.title(str(x_pixel) + " , " + str(y_pixel))
+        # plt.title(str(x_pixel) + " , " + str(y_pixel)+" region : "+str(row['region']))
         plt.imshow(image[y_pixel - distance:y_pixel + distance,
-                   x_pixel - distance:x_pixel + distance, 1])
+                   x_pixel - distance:x_pixel + distance,0])
+        ax = plt.gca()
+        rect = ptc.Rectangle((distance - 10, distance - 10), 20, 20, linewidth=1, edgecolor='r', facecolor='none')
+        ax.add_patch(rect)
     plt.savefig("there7.jpg")
 
 
@@ -41,8 +46,8 @@ def someplayswithpic(jp2_path):
     :return: None
     """
     pixel_to_mictoMeter = 0.203125  # For calculate real nucleus area
-    x_pixel = 3614
-    y_pixel = 8293
+    x_pixel = 5308
+    y_pixel = 4531
     distance = 200
     kernel = np.ones((5, 5), np.uint8)
     image_cfos_channel = plt.imread(jp2_path)[:, :, 1][y_pixel - distance:y_pixel + distance,
@@ -54,7 +59,9 @@ def someplayswithpic(jp2_path):
     image = cv2.morphologyEx(np.float32(image), cv2.MORPH_CLOSE, kernel)
     label_image = label(image)
     region = regionprops(label_image)
-    plt.imshow(image_cfos_channel)
+
+    x,y=image.shape
+    plt.imshow(image_cfos_channel, extent=(0,x*pixel_to_mictoMeter,0,y*pixel_to_mictoMeter))
     fig, ax = plt.subplots()
     ax.imshow(image, cmap=plt.cm.gray)
 
@@ -139,7 +146,7 @@ def bridgeForParallelize(data):
     region_prop = []
     result = pd.DataFrame()
     for idx, row in df.iterrows():
-        res = checkPositiveCfos(image, int(row['x']), int(abs(row['y'])), 200)
+        res = checkPositiveCfos(image, int(row['x']), int(abs(row['y'])), 300)
         is_cFos_positive.append(res[0])
         region_prop.append(res[1])
     result['relevent'] = is_cFos_positive
@@ -190,10 +197,11 @@ def filter_nucleus_by_cfos(path, jp2_name, csv_name):
 
 
 if __name__ == '__main__':
-    # Image.MAX_IMAGE_PIXELS = 10 ** 9
-    # someplayswithpic(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.jp2')
     Image.MAX_IMAGE_PIXELS = 10 ** 9
-    image = plt.imread(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-855.jp2')
-    df = pd.read_csv(
-        r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\cfos_filtered\-855.csv')
-    exportPanelResults(image, df)
+    someplayswithpic(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-2855.jp2')
+    # Image.MAX_IMAGE_PIXELS = 10 ** 9
+    # image = plt.imread(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-2855.jp2')
+    # df = pd.read_csv(
+    #     r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\NeunFilter\-2855.csv').iloc[:700]
+    # exportPanelResults(image, df)
+    # filter_nucleus_by_cfos(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files','-2855.jp2','-2855.csv')
