@@ -1,10 +1,10 @@
-from calculateCfosIntensity import CalculateCfosIntensity
+from Appendices.calculateCfosIntensity import CalculateCfosIntensity
 # from create_image_for_DataSet import create_iamges_for_DataSet
 from Initialyze.csv_section_initialize import Initialize_CSV_Files
 import os
 import threading
 from Filters.filterByBlobDetect import filterCellByBlobDetection
-from create_image_for_DataSet import create_images_for_DataSet
+from Appendices.create_image_for_DataSet import create_images_for_DataSet
 
 
 def initcsvFile(path, fileName, no_fit_list):
