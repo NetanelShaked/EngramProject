@@ -30,7 +30,6 @@ def exportPanelResults(image,csv):
         plt.title(str(idx))
         plt.imshow(image[y_pixel - distance:y_pixel + distance,
                          x_pixel - distance:x_pixel + distance,1])
-
     plt.savefig("there3.jpg")
 
 def someplayswithpic(jp2_path):
@@ -122,14 +121,24 @@ def checkPositiveCfos(image, x_coordinate, y_coordinate, distance):
         if props.area < 50 or props.eccentricity > 0.95 or props.extent < 0.3 or props.minor_axis_length < 10 or props.major_axis_length > 60:
             continue
         if abs(props.centroid[0] - distance) < 10 and abs(props.centroid[1] - distance) < 10:
-            return True
-    return False
+            return True, (props.area, props.minor_axis_length, props.major_axis_length)
+    return False, ()
 
 
 def bridgeForParallelize(data):
-    df = data[1]
+    df = pd.DataFrame(data[1])
     image = data[0]
-    return df.T.apply(lambda row: checkPositiveCfos(image, int(row['x']), int(abs(row['y'])), 200))
+    is_cFos_positive=[]
+    region_prop=[]
+    result=pd.DataFrame()
+    for idx,row in df.iterrows():
+        res=checkPositiveCfos(image, int(row['x']), int(abs(row['y'])), 200)
+        is_cFos_positive.append(res[0])
+        region_prop.append(res[1])
+    result['relevent']=is_cFos_positive
+    result['region_prop']=region_prop
+    return result
+
 
 
 def parallelize(data, image, func, num_of_processes=multiprocessing.cpu_count() - 1):
@@ -146,9 +155,18 @@ def filterNuclesByCfos(path, jp2_name, csv_name):
     csv = pd.read_csv(os.path.join(path, csv_name))
     jp2_image = plt.imread(os.path.join(path, jp2_name))
     relevant = parallelize(csv, jp2_image,bridgeForParallelize)
-    csv['relevent'] = relevant
+    csv['relevent'] = relevant['relevent'].values
+    csv['region_prop'] = relevant['region_prop'].values
     csv = csv[csv['relevent']]
+
     del csv['relevent']
+    for region_prop in csv['region_prop'].unique():
+        if len(csv[csv['region_prop']==region_prop])>1:
+            print("found")
+            one_res=csv[csv['region_prop']==region_prop].values[0]
+            csv.drop(index=csv[csv['region_prop']==region_prop].index, inplace=True)
+            csv=csv.append(one_res,ignore_index=True)
+    del csv['region_prop']
     try:
         os.mkdir(os.path.join(path, "cfos_filtered"))
     except FileExistsError:
@@ -161,6 +179,6 @@ if __name__ == '__main__':
     # Image.MAX_IMAGE_PIXELS = 10 ** 9
     # someplayswithpic(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.jp2')
     Image.MAX_IMAGE_PIXELS=10**9
-    image=plt.imread(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.jp2')
-    df=pd.read_csv(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\cfos_filtered\-1255.csv')
+    image=plt.imread(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1055.jp2')
+    df=pd.read_csv(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\cfos_filtered\-1055.csv')
     exportPanelResults(image,df)
