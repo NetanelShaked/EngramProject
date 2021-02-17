@@ -17,12 +17,10 @@ def apply_action_on_path(path):
     for file in files_names:
         file_name = file[:-4]
         print(file_name)
-        filter_by_background(path, file_name + ".jp2", file_name + ".csv")
+        filter_NeuN_by_background(path, file_name + ".jp2", file_name + ".csv")
 
 
 def parallelize(data, image, func, num_of_processes=multiprocessing.cpu_count() - 1):
-    # image_shared=manger.Namespace()
-    # image_shared.data=image
     data_split = np.array_split(data, num_of_processes)
     pool = multiprocessing.Pool(num_of_processes)
     data = pd.concat(pool.map(func, zip([image for i in range(num_of_processes)], data_split)))
@@ -32,26 +30,43 @@ def parallelize(data, image, func, num_of_processes=multiprocessing.cpu_count() 
 
 
 def handle_df(data):
+    """
+    For using parallelize, each part of DF send to this function and apply decision function
+    :param data: data[0] is image as numpy array and data [1] is pandas DataFrame contain info
+    :return: DataFrame with True/False returned by decision function
+    """
     image = data[0]
     df = data[1]
     return df.T.apply(lambda row: decision(image, int(row['x']), int(abs(row['y'])), 200))
 
 
+def filter_NeuN_by_background(path, jp2_name, csv_name):
+    """
 
-
-def filter_by_background(path, jp2_name, csv_name, channel=None):
+    :param path: path to folder contain the image and DataFrame
+    :param jp2_name: image file name
+    :param csv_name: csv file name
+    :return: create csv file for the csv file sent, contain only the NeuN positive nucleus.
+    """
     Image.MAX_IMAGE_PIXELS = 10 ** 9
     image = plt.imread(path + "//" + jp2_name)
     csv = pd.read_csv(path + "//" + csv_name)
     csv['relevant'] = parallelize(csv, image, handle_df)
-    # relevent = csv.T.apply(lambda row: decision(image, int(row['x']), int(abs(row['y'])), 500))
-    # csv['relevant'] = relevent
+
     csv = csv[csv['relevant']]
     del csv['relevant']
-    csv.to_csv(path + "//" + csv_name[:-4] + "_new.csv", index=False)
+    csv.to_csv(os.path.join(path, csv_name[:-4] + "_new.csv"), index=False)
 
 
 def decision(image, x_coordinate, y_coordinate, distance):
+    """
+
+    :param image: image as numpy array
+    :param x_coordinate: x coordinate of nucleus interest
+    :param y_coordinate: y coordinate of nucleus interest
+    :param distance: distance for local image for micro analyze
+    :return:
+    """
     channel = 0
     local_image_matrix = image[y_coordinate - distance:y_coordinate + distance,
                          x_coordinate - distance:x_coordinate + distance]
@@ -59,14 +74,17 @@ def decision(image, x_coordinate, y_coordinate, distance):
     limit = otsu(local_image_matrix_one_channel)
     pixel_value = image[y_coordinate, x_coordinate]
     if pixel_value[channel] >= limit:
-        # need to expend with more checks
-        # print(pixel_value)
         return True
     else:
+        # if pixel value is smaller then the background value calculate by otsu
+        # we have to check if there is another reason to check this nucleus any way
+        # we looking for c-fos so if cfos value (channel3) is bigger then mean+4*std of channel3 intensity
+        # in local area we keep this coordinates
+
         local_image_cfos = local_image_matrix[:, :, 1]
         mean = local_image_cfos.mean()
         std = local_image_cfos.std()
-        threshold=mean + 4 * std
+        threshold = mean + 4 * std
         if pixel_value[1] > threshold:
             return True
         return False

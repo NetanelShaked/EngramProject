@@ -1,5 +1,5 @@
 import os
-from Filters.FilterCfosResults import filterNuclesByCfos
+from Filters.FilterCfosResults import filter_nucleus_by_cfos
 
 def applyFunctionOnAllCsvFiles(path, function):
     """
@@ -22,4 +22,4 @@ def applyFunctionOnAllCsvFiles(path, function):
 
 if __name__ == '__main__':
     path=r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files'
-    applyFunctionOnAllCsvFiles(path,filterNuclesByCfos)
+    applyFunctionOnAllCsvFiles(path, filter_nucleus_by_cfos)
