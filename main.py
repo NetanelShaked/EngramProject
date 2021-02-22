@@ -74,7 +74,7 @@ def multi_thread_blob_filter(path):
 def action_multi_checking(path,image,data):
     filterCellByBlobDetection(path, image, data).action()
 
-path = r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files'
+path = r'C:\Users\shako\Desktop'
 
 """-----------------------"""
 
@@ -84,8 +84,8 @@ path = r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files'
 
 """------------------------"""
 #
-# s = Initialize_CSV_Files(path, "all_channels_1h_N3_points.csv")
-# s.action()
+s = Initialize_CSV_Files(path, "regions.csv")
+s.action()
 
 """----------------"""
 

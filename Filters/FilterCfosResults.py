@@ -8,8 +8,11 @@ import multiprocessing
 import numpy as np
 import os
 import cv2
+from skimage.filters import threshold_otsu as otsu
 from skimage.measure import label, regionprops
 import matplotlib.patches as ptc
+from sklearn import utils
+
 
 
 def exportPanelResults(image, csv):
@@ -22,7 +25,7 @@ def exportPanelResults(image, csv):
     csv = pd.DataFrame(csv)
     numberOfNucles = len(csv)
     images = []
-    plt.figure(figsize=(100, 100))
+    plt.figure(figsize=(200, 200))
     plotsize = int((numberOfNucles ** 0.5) + 1)
     distance = 300
     for idx, row in csv.iterrows():
@@ -36,7 +39,7 @@ def exportPanelResults(image, csv):
         ax = plt.gca()
         rect = ptc.Rectangle((distance - 10, distance - 10), 20, 20, linewidth=1, edgecolor='r', facecolor='none')
         ax.add_patch(rect)
-    plt.savefig("there7.jpg")
+    plt.savefig("filtereNeuN-1255_2.jpg")
 
 
 def someplayswithpic(jp2_path):
@@ -46,14 +49,15 @@ def someplayswithpic(jp2_path):
     :return: None
     """
     pixel_to_mictoMeter = 0.203125  # For calculate real nucleus area
-    x_pixel = 5308
-    y_pixel = 4531
+    x_pixel = 6110
+    y_pixel = 4739
     distance = 200
     kernel = np.ones((5, 5), np.uint8)
     image_cfos_channel = plt.imread(jp2_path)[:, :, 1][y_pixel - distance:y_pixel + distance,
                          x_pixel - distance:x_pixel + distance]
-    threshold = image_cfos_channel.mean() + 4 * image_cfos_channel.std()
-    image = image_cfos_channel > threshold
+    threshold = otsu(image_cfos_channel)
+    # threshold = image_cfos_channel.mean() + 1 * image_cfos_channel.std()
+    image = image_cfos_channel >= threshold
     plt.imshow(image)
     plt.show()
     image = cv2.morphologyEx(np.float32(image), cv2.MORPH_CLOSE, kernel)
@@ -72,7 +76,7 @@ def someplayswithpic(jp2_path):
         # be can pass extent is how much the area of the region take from all the box its belong to minor and major
         # axis len represent the long and short Radius, we looking for radius of 4~8 micron
         # note that each pixel is 0.2~ micron
-        if props.area < 50 or props.eccentricity > 0.95 or props.extent < 0.3 or props.minor_axis_length < 10 or props.major_axis_length > 60:
+        if props.area < 50 or props.eccentricity > 0.9 or props.extent < 0.3 or props.minor_axis_length < 5 or props.major_axis_length > 30:
             continue
         print("extent is : " + str(props.extent))
         print("minor axis len is : " + str(props.minor_axis_length))
@@ -112,7 +116,8 @@ def checkPositiveCfos(image, x_coordinate, y_coordinate, distance):
     image_cfos_channel = image[y_pixel - distance:y_pixel + distance,
                          x_pixel - distance:x_pixel + distance, 1]
 
-    threshold = image_cfos_channel.mean() + 4 * image_cfos_channel.std()
+    # threshold = image_cfos_channel.mean() + 4 * image_cfos_channel.std()
+    threshold = otsu(image_cfos_channel)
 
     image = image_cfos_channel > threshold
     image = cv2.morphologyEx(np.float32(image), cv2.MORPH_CLOSE, kernel)
@@ -127,7 +132,7 @@ def checkPositiveCfos(image, x_coordinate, y_coordinate, distance):
         # axis len represent the long and short Radius, we looking for radius of 4~8 micron
         # note that each pixel is 0.2~ micron
 
-        if props.area < 50 or props.eccentricity > 0.95 or props.extent < 0.3 or props.minor_axis_length < 10 or props.major_axis_length > 60:
+        if props.area < 50 or props.eccentricity > 0.9 or props.extent < 0.3 or props.minor_axis_length < 5 or props.major_axis_length > 50:
             continue
         if abs(props.centroid[0] - distance) < 10 and abs(props.centroid[1] - distance) < 10:
             return True, (props.area, props.minor_axis_length, props.major_axis_length)
@@ -146,7 +151,7 @@ def bridgeForParallelize(data):
     region_prop = []
     result = pd.DataFrame()
     for idx, row in df.iterrows():
-        res = checkPositiveCfos(image, int(row['x']), int(abs(row['y'])), 300)
+        res = checkPositiveCfos(image, int(row['x']), int(abs(row['y'])), 800)
         is_cFos_positive.append(res[0])
         region_prop.append(res[1])
     result['relevent'] = is_cFos_positive
@@ -197,11 +202,16 @@ def filter_nucleus_by_cfos(path, jp2_name, csv_name):
 
 
 if __name__ == '__main__':
-    Image.MAX_IMAGE_PIXELS = 10 ** 9
-    someplayswithpic(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-2855.jp2')
     # Image.MAX_IMAGE_PIXELS = 10 ** 9
-    # image = plt.imread(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-2855.jp2')
-    # df = pd.read_csv(
-    #     r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\NeunFilter\-2855.csv').iloc[:700]
-    # exportPanelResults(image, df)
-    # filter_nucleus_by_cfos(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files','-2855.jp2','-2855.csv')
+    # someplayswithpic(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-2855.jp2')
+
+    Image.MAX_IMAGE_PIXELS = 10 ** 9
+    image = plt.imread(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.jp2')
+
+    df = pd.DataFrame(utils.shuffle(pd.read_csv(
+        r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\NeunFilter\-1255_try.csv'))).reset_index().iloc[:2000]
+
+    # df = pd.DataFrame(utils.shuffle(pd.read_csv(
+    # r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\cfos_filtered\-2655_try1.csv'))).reset_index()
+    exportPanelResults(image, df)
+    # filter_nucleus_by_cfos(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files','-2655.jp2','-2655_try1.csv')

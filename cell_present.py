@@ -9,17 +9,18 @@ from skimage import filters
 Image.MAX_IMAGE_PIXELS = 275727232
 
 image = plt.imread(
-    r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-2855.jp2')
+    r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.jp2')
 # data=pn.read_csv(r'D:\engram\New_Converted_Folder\N3\1h\csv files\separate files\1345.csv')
 
-x_pixel = 12785
-y_pixel = 9201
+x_pixel = 8284
+y_pixel = 6791
 
-distance = 500
+distance = 300
 # plt.imsave(r'C:\Users\owner\Desktop\dataset\test.jpg',
 #            image[y_pixel - 20:y_pixel + 20, x_pixel - 20:x_pixel + 20, :])
 #
-cc=filters.threshold_otsu(image[:,:,0])
+# cc=filters.threshold_otsu(image[:,:,0])
+
 cell_matrix = image[:, :, 0][y_pixel - distance:y_pixel + distance, x_pixel - distance:x_pixel + distance]
 x,y=cell_matrix.shape
 pixel_to_mictoMeter=0.203125
@@ -28,17 +29,24 @@ plt.figure(figsize=(20, 20))
 plt.subplot(141)
 plt.title("NeuN-otsu")
 ax = plt.gca()
-print ("threshold whole image is : "+ str(cc))
-plt.imshow(cell_matrix>val, cmap='gray',extent=(0,x*pixel_to_mictoMeter,0,y*pixel_to_mictoMeter))
-print(val)
-print(image[y_pixel,x_pixel,0])
+
+# print ("threshold whole image is : "+ str(cc))
+
+print (cell_matrix.std())
+
+threshold=val+1*cell_matrix.std()*1.5
+
+print("threshold=",threshold)
+plt.imshow(cell_matrix>threshold, cmap='gray')
+print("ostu threshold is :",val)
+print(image[y_pixel-4:y_pixel+4,x_pixel-4:x_pixel+4,0].mean())
 rect = ptc.Rectangle((distance - 10, distance - 10), 20, 20, linewidth=1, edgecolor='r', facecolor='none')
 ax.add_patch(rect)
 
 plt.subplot(142)
 ax = plt.gca()
 plt.title("NeuN")
-plt.imshow(cell_matrix, cmap='gray',extent=(0,x*pixel_to_mictoMeter,0,y*pixel_to_mictoMeter))
+plt.imshow(cell_matrix, cmap='gray')
 print(val)
 print(image[y_pixel,x_pixel,0])
 rect = ptc.Rectangle((distance - 10, distance - 10), 20, 20, linewidth=1, edgecolor='r', facecolor='none')
