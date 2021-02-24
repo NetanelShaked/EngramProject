@@ -12,34 +12,8 @@ from skimage.filters import threshold_otsu as otsu
 from skimage.measure import label, regionprops
 import matplotlib.patches as ptc
 from sklearn import utils
-
-
-
-def exportPanelResults(image, csv):
-    """
-
-    :param image: image of bregma
-    :param csv: DataFrame of this bregma
-    :return: exoprt panel of all nucles found cfos positive in DataFrame
-    """
-    csv = pd.DataFrame(csv)
-    numberOfNucles = len(csv)
-    images = []
-    plt.figure(figsize=(200, 200))
-    plotsize = int((numberOfNucles ** 0.5) + 1)
-    distance = 300
-    for idx, row in csv.iterrows():
-        x_pixel = int(row['x'])
-        y_pixel = int(abs(row['y']))
-        plt.subplot(plotsize, plotsize, idx + 1)
-        plt.title(str(x_pixel) + " , " + str(y_pixel))
-        # plt.title(str(x_pixel) + " , " + str(y_pixel)+" region : "+str(row['region']))
-        plt.imshow(image[y_pixel - distance:y_pixel + distance,
-                   x_pixel - distance:x_pixel + distance,0])
-        ax = plt.gca()
-        rect = ptc.Rectangle((distance - 10, distance - 10), 20, 20, linewidth=1, edgecolor='r', facecolor='none')
-        ax.add_patch(rect)
-    plt.savefig("filtereNeuN-1255_2.jpg")
+from VisualizationTools.ExportPanels import export3ChannelsPanelResults
+from VisualizationTools.ExportPanels import exportPanelResults
 
 
 def someplayswithpic(jp2_path):
@@ -49,14 +23,14 @@ def someplayswithpic(jp2_path):
     :return: None
     """
     pixel_to_mictoMeter = 0.203125  # For calculate real nucleus area
-    x_pixel = 6110
-    y_pixel = 4739
-    distance = 200
+    x_pixel = 12548
+    y_pixel = 7776
+    distance = 300
     kernel = np.ones((5, 5), np.uint8)
     image_cfos_channel = plt.imread(jp2_path)[:, :, 1][y_pixel - distance:y_pixel + distance,
                          x_pixel - distance:x_pixel + distance]
-    threshold = otsu(image_cfos_channel)
-    # threshold = image_cfos_channel.mean() + 1 * image_cfos_channel.std()
+    # threshold = otsu(image_cfos_channel)
+    threshold = image_cfos_channel.mean() + 2 * image_cfos_channel.std()
     image = image_cfos_channel >= threshold
     plt.imshow(image)
     plt.show()
@@ -64,8 +38,11 @@ def someplayswithpic(jp2_path):
     label_image = label(image)
     region = regionprops(label_image)
 
-    x,y=image.shape
-    plt.imshow(image_cfos_channel, extent=(0,x*pixel_to_mictoMeter,0,y*pixel_to_mictoMeter))
+    x, y = image.shape
+    plt.imshow(image_cfos_channel, extent=(0, x * pixel_to_mictoMeter, 0, y * pixel_to_mictoMeter))
+    ax = plt.gca()
+    rect = ptc.Rectangle((distance - 10, distance - 10), 20, 20, linewidth=1, edgecolor='r', facecolor='none')
+    ax.add_patch(rect)
     fig, ax = plt.subplots()
     ax.imshow(image, cmap=plt.cm.gray)
 
@@ -97,7 +74,7 @@ def someplayswithpic(jp2_path):
         by = (minr, minr, maxr, maxr, minr)
         ax.plot(bx, by, '-b', linewidth=0.5)
 
-    ax.axis((0, 400, 400, 0))
+    ax.axis((0, 600, 600, 0))
     plt.show()
 
 
@@ -116,8 +93,9 @@ def checkPositiveCfos(image, x_coordinate, y_coordinate, distance):
     image_cfos_channel = image[y_pixel - distance:y_pixel + distance,
                          x_pixel - distance:x_pixel + distance, 1]
 
-    # threshold = image_cfos_channel.mean() + 4 * image_cfos_channel.std()
-    threshold = otsu(image_cfos_channel)
+    image_cfos_channel_without_outlines = image_cfos_channel[image_cfos_channel > 0]
+    threshold = image_cfos_channel_without_outlines.mean() + 1.5 * image_cfos_channel_without_outlines.std()
+    # threshold = otsu(image_cfos_channel_without_outlines)
 
     image = image_cfos_channel > threshold
     image = cv2.morphologyEx(np.float32(image), cv2.MORPH_CLOSE, kernel)
@@ -151,7 +129,7 @@ def bridgeForParallelize(data):
     region_prop = []
     result = pd.DataFrame()
     for idx, row in df.iterrows():
-        res = checkPositiveCfos(image, int(row['x']), int(abs(row['y'])), 800)
+        res = checkPositiveCfos(image, int(row['x']), int(abs(row['y'])), 300)
         is_cFos_positive.append(res[0])
         region_prop.append(res[1])
     result['relevent'] = is_cFos_positive
@@ -192,26 +170,26 @@ def filter_nucleus_by_cfos(path, jp2_name, csv_name):
             # one_res=csv[csv['region_prop']==region_prop].values[0]
             csv.drop(index=csv[csv['region_prop'] == region_prop].index[1:], inplace=True)
             # csv=csv.append(one_res,ignore_index=True)
+    csv['minor radius']=[i[1] for i in csv['region_prop'].values]
+    csv['major radius']=[i[2] for i in csv['region_prop'].values]
     del csv['region_prop']
     try:
         os.mkdir(os.path.join(path, "cfos_filtered"))
     except FileExistsError:
         pass
 
-    csv.to_csv(os.path.join(os.path.join(path, "cfos_filtered"), csv_name), index=False)
+    csv.to_csv(os.path.join(os.path.join(path, "cfos_filtered"), csv_name[:-4] + "_1_5std.csv"), index=False)
 
 
 if __name__ == '__main__':
-    # Image.MAX_IMAGE_PIXELS = 10 ** 9
-    # someplayswithpic(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-2855.jp2')
 
     Image.MAX_IMAGE_PIXELS = 10 ** 9
-    image = plt.imread(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.jp2')
+    # someplayswithpic(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.jp2')
 
-    df = pd.DataFrame(utils.shuffle(pd.read_csv(
-        r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\NeunFilter\-1255_try.csv'))).reset_index().iloc[:2000]
+    # filter_nucleus_by_cfos(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files','-1255.jp2','-1255.csv')
 
-    # df = pd.DataFrame(utils.shuffle(pd.read_csv(
-    # r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\cfos_filtered\-2655_try1.csv'))).reset_index()
-    exportPanelResults(image, df)
-    # filter_nucleus_by_cfos(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files','-2655.jp2','-2655_try1.csv')
+    image_path = r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.jp2'
+    csv_path = r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\cfos_filtered\-1255_1_5std.csv'
+    #
+    # export3ChannelsPanelResults(image_path,csv_path,img_name="otsu.jpg",distance=300)
+    exportPanelResults(image_path, csv_path, 1, 300, "1_5std.jpg", drow_treangle=True)

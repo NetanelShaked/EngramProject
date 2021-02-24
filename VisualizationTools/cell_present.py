@@ -12,8 +12,8 @@ image = plt.imread(
     r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.jp2')
 # data=pn.read_csv(r'D:\engram\New_Converted_Folder\N3\1h\csv files\separate files\1345.csv')
 
-x_pixel = 8284
-y_pixel = 6791
+x_pixel = 6449
+y_pixel = 4970
 
 distance = 300
 # plt.imsave(r'C:\Users\owner\Desktop\dataset\test.jpg',
@@ -23,8 +23,9 @@ distance = 300
 
 cell_matrix = image[:, :, 0][y_pixel - distance:y_pixel + distance, x_pixel - distance:x_pixel + distance]
 x,y=cell_matrix.shape
+print("image mean is : ", cell_matrix[cell_matrix>0].mean())
 pixel_to_mictoMeter=0.203125
-val = filters.threshold_otsu(cell_matrix)
+val = filters.threshold_otsu(cell_matrix[cell_matrix>0])
 plt.figure(figsize=(20, 20))
 plt.subplot(141)
 plt.title("NeuN-otsu")
@@ -34,12 +35,12 @@ ax = plt.gca()
 
 print (cell_matrix.std())
 
-threshold=val+1*cell_matrix.std()*1.5
+threshold=val+1*cell_matrix.std()
 
 print("threshold=",threshold)
 plt.imshow(cell_matrix>threshold, cmap='gray')
 print("ostu threshold is :",val)
-print(image[y_pixel-4:y_pixel+4,x_pixel-4:x_pixel+4,0].mean())
+print("cell mean is : ", image[y_pixel-4:y_pixel+4,x_pixel-4:x_pixel+4,0].mean())
 rect = ptc.Rectangle((distance - 10, distance - 10), 20, 20, linewidth=1, edgecolor='r', facecolor='none')
 ax.add_patch(rect)
 
@@ -47,8 +48,7 @@ plt.subplot(142)
 ax = plt.gca()
 plt.title("NeuN")
 plt.imshow(cell_matrix, cmap='gray')
-print(val)
-print(image[y_pixel,x_pixel,0])
+print("pixel value is : ", image[y_pixel,x_pixel,0])
 rect = ptc.Rectangle((distance - 10, distance - 10), 20, 20, linewidth=1, edgecolor='r', facecolor='none')
 ax.add_patch(rect)
 
