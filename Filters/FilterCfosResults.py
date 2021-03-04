@@ -178,7 +178,7 @@ def filter_nucleus_by_cfos(path, jp2_name, csv_name):
     except FileExistsError:
         pass
 
-    csv.to_csv(os.path.join(os.path.join(path, "cfos_filtered"), csv_name[:-4] + "_1_5std.csv"), index=False)
+    csv.to_csv(os.path.join(os.path.join(path, "cfos_filtered"), csv_name[:-4] + "_without_neunFilter_1_5std.csv"), index=False)
 
 
 if __name__ == '__main__':
@@ -189,7 +189,7 @@ if __name__ == '__main__':
     # filter_nucleus_by_cfos(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files','-1255.jp2','-1255.csv')
 
     image_path = r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.jp2'
-    csv_path = r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\cfos_filtered\-1255_1_5std.csv'
-    #
-    # export3ChannelsPanelResults(image_path,csv_path,img_name="otsu.jpg",distance=300)
-    exportPanelResults(image_path, csv_path, 1, 300, "1_5std.jpg", drow_treangle=True)
+    csv_path = r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\cfos_filtered\-1255_without_neunFilter_3std.csv'
+
+    # export3ChannelsPanelResults(image_path,csv_path,img_name="-1255_3std.jpg",distance=300)
+    exportPanelResults(image_path, csv_path, 1, 300, "3std_cfos_without_neun_filter.jpg", drow_treangle=True,number_of_examples=500)

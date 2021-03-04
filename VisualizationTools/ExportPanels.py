@@ -33,7 +33,8 @@ def exportPanelResults(image_path, csv_path, channel, distance=500, img_name=Non
 
     if number_of_examples is None:
         number_of_examples = len(csv)
-    pixel_to_mictoMeter = 0.203125  # For calculate real nucleus area
+    number_of_examples = min(number_of_examples, len(csv))
+    pixel_to_micrometer = 0.203125  # For calculate real nucleus area
     csv = utils.shuffle(csv).reset_index().iloc[:number_of_examples]
     numberOfNucles = number_of_examples
     plt.figure(figsize=(200, 200))
@@ -43,8 +44,9 @@ def exportPanelResults(image_path, csv_path, channel, distance=500, img_name=Non
         y_pixel = int(abs(row['y']))
         plt.subplot(plotsize, plotsize, idx + 1)
         plt.title(
-            str(x_pixel) + "," + str(y_pixel) + " min " + "{:.2f}".format(int(row['minor radius'])*pixel_to_mictoMeter) + " max " + "{:.2f}".format(
-                int(row['major radius'])*pixel_to_mictoMeter))
+            str(x_pixel) + "," + str(y_pixel) + " min " + "{:.2f}".format(
+                int(row['minor radius']) * pixel_to_micrometer) + " max " + "{:.2f}".format(
+                int(row['major radius']) * pixel_to_micrometer))
         # plt.title(str(x_pixel) + " , " + str(y_pixel)+" region : "+str(row['region']))
         plt.imshow(image[y_pixel - distance:y_pixel + distance,
                    x_pixel - distance:x_pixel + distance, channel])
@@ -74,6 +76,7 @@ def export3ChannelsPanelResults(image_path, csv_path, distance=500, img_name=Non
     if number_of_examples is None:
         number_of_examples = len(csv)
 
+    pixel_to_mictoMeter = 0.203125  # For calculate real nucleus area
     csv = utils.shuffle(csv).reset_index().iloc[:number_of_examples]
     plt.figure(figsize=(25, min(5 * number_of_examples, (2 ** 16) / 100) - 1))
     for idx, row in csv.iterrows():
@@ -88,7 +91,9 @@ def export3ChannelsPanelResults(image_path, csv_path, distance=500, img_name=Non
         rect = ptc.Rectangle((distance - 20, distance - 20), 40, 40, linewidth=1, edgecolor='r', facecolor='none')
         ax.add_patch(rect)
         plt.subplot(number_of_examples, 4, 4 * idx + 2)
-        plt.title(str(x_pixel) + " , " + str(y_pixel) + " C-fos")
+        plt.title(
+            "min " + "{:.2f}".format(int(row['minor radius']) * pixel_to_mictoMeter) + " max " + "{:.2f}".format(
+                int(row['major radius']) * pixel_to_mictoMeter))
         plt.imshow(image[y_pixel - distance:y_pixel + distance,
                    x_pixel - distance:x_pixel + distance, 1])
         ax = plt.gca()
@@ -110,6 +115,8 @@ def export3ChannelsPanelResults(image_path, csv_path, distance=500, img_name=Non
         rect = ptc.Rectangle((3 * distance - 20, 3 * distance - 20), 40, 40, linewidth=1, edgecolor='r',
                              facecolor='none')
         ax.add_patch(rect)
+
+    plt.tight_layout()
     if img_name is None:
         img_name = csv_path.split('\\')[-1][:-4]
     plt.savefig(img_name)
