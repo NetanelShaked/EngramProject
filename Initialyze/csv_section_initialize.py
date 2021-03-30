@@ -29,7 +29,7 @@ class Initialize_CSV_Files:
         :return: list of mismatch id's
         """
 
-        registration_csv = pd.read_csv(r'D:\engram\New_Converted_Folder\ontology_api_2017.csv')
+        registration_csv = pd.read_csv(r'D:\Lab\ontology_api_2017.csv')
         if is_main_csv != 1:
             csv_data_file = pd.read_csv(self.path + "\\" + self.fileName)
         else:

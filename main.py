@@ -5,6 +5,7 @@ import os
 import threading
 from Filters.filterByBlobDetect import filterCellByBlobDetection
 from Appendices.create_image_for_DataSet import create_images_for_DataSet
+from Initialyze.getCSVbyBregma import separatePointCSVfile
 
 
 def initcsvFile(path, fileName, no_fit_list):
@@ -74,7 +75,7 @@ def multi_thread_blob_filter(path):
 def action_multi_checking(path,image,data):
     filterCellByBlobDetection(path, image, data).action()
 
-path = r'C:\Users\shako\Desktop'
+path = r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files'
 
 """-----------------------"""
 
@@ -84,16 +85,16 @@ path = r'C:\Users\shako\Desktop'
 
 """------------------------"""
 #
-s = Initialize_CSV_Files(path, "regions.csv")
-s.action()
-
+# s = Initialize_CSV_Files(path, "1h_n2_fixed_points.csv")
+# s.action()
+#
 """----------------"""
 
 # s = Separate_Regions(path, "Naive_N1", "all_channels_Naive_N1_points_withNames.csv", r'D:\engram\New_Converted_Folder\N1 - Copy\summary').action_parents()
 
 """-----------------------"""
 
-# separatePointCSVfile(path,'1h_n2_points_withNames.csv').separate()
+separatePointCSVfile(path,'1h_n2_fixed_points_withNames.csv').separate()
 # separatePointCSVfile(path+"\\separate files").merge()
 
 """------------------"""

@@ -9,13 +9,13 @@ from skimage import filters
 Image.MAX_IMAGE_PIXELS = 275727232
 
 image = plt.imread(
-    r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.jp2')
+    r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files\separate files_2\-1255.jp2')
 # data=pn.read_csv(r'D:\engram\New_Converted_Folder\N3\1h\csv files\separate files\1345.csv')
 
-x_pixel = 5715
-y_pixel = 5173
+x_pixel = 6556
+y_pixel = 4227
 
-distance = 13
+distance = 100
 
 # plt.imsave(r'C:\Users\owner\Desktop\dataset\test.jpg',
 #            image[y_pixel - 20:y_pixel + 20, x_pixel - 20:x_pixel + 20, :])
