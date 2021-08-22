@@ -22,7 +22,7 @@ def visualization_all_brain_cells(image_path, csv_path):
         x_pixel=int(row['x'])
         new_image[y_pixel-cell_size:y_pixel+cell_size,x_pixel-cell_size:x_pixel+cell_size]=1
     plt.imshow(new_image , cmap='gray')
-    plt.imsave("whole_brain_output_by_csvDetails.jpg",new_image, cmap='gray')
+    plt.imsave("whole_brain_output_after_NeuN_filter.jpg",new_image, cmap='gray')
     plt.show()
 
 def visualization_all_brain_cells_from_fiji_results(image_path,csv_path):
@@ -41,8 +41,8 @@ def visualization_all_brain_cells_from_fiji_results(image_path,csv_path):
 
 if __name__ == '__main__':
     # csv_path=r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.csv'
-    csv_path=r'C:\Users\shako\Desktop\Results.csv'
+    csv_path=r'D:\Lab\סלייס נסיון קונפוקל-20210505T154605Z-001\סלייס נסיון קונפוקל\there_test\test_points.csv'
     # csv_path=r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files\separate files_2\-1255.csv'
-    image_path=r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files\separate files_2\-1255.jp2'
-    # visualization_all_brain_cells(image_path, csv_path)
-    visualization_all_brain_cells_from_fiji_results(image_path,csv_path)
+    image_path=r'D:\Lab\סלייס נסיון קונפוקל-20210505T154605Z-001\סלייס נסיון קונפוקל\there_test\test_2.jp2'
+    visualization_all_brain_cells(image_path, csv_path)
+    # visualization_all_brain_cells_from_fiji_results(image_path,csv_path)

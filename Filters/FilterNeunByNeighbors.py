@@ -44,15 +44,15 @@ def squere_info(image_path, csv_path):
         local_image = image[y_pixel - distance:y_pixel + distance,
                       x_pixel - distance:x_pixel + distance, channel]
         im=plt.imshow(local_image, cmap='gray')
-        plt.imshow(cell_locations, cmap='copper', alpha=0.5)
+        # plt.imshow(cell_locations, cmap='copper', alpha=0.5)
         # im = plt.imshow(cell_locations, cmap='copper')
         plt.colorbar(im)
-        plt.savefig(os.path.join(r'D:\Lab\4-3 talk_2', str(idx_main) + ".jpg"))
+        plt.savefig(os.path.join(r'D:\Lab\4-3 talk_3', str(idx_main) + ".jpg"))
         plt.close()
     # plt.show()
 
 
 if __name__ == '__main__':
-    image = r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files\separate files_2\-1255.jp2'
-    csv = r'C:\Users\shako\PycharmProjects\EngramProject\Appendices\checking.csv'
+    image = r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.jp2'
+    csv = r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.csv'
     squere_info(image, csv)

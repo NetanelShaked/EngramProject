@@ -75,7 +75,7 @@ def multi_thread_blob_filter(path):
 def action_multi_checking(path,image,data):
     filterCellByBlobDetection(path, image, data).action()
 
-path = r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files'
+path = r'D:\Lab\סלייס נסיון קונפוקל-20210505T154605Z-001\סלייס נסיון קונפוקל\there_test'
 
 """-----------------------"""
 
@@ -85,8 +85,8 @@ path = r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files'
 
 """------------------------"""
 #
-# s = Initialize_CSV_Files(path, "1h_n2_fixed_points.csv")
-# s.action()
+s = Initialize_CSV_Files(path, "test_points.csv")
+s.action()
 #
 """----------------"""
 
@@ -94,7 +94,7 @@ path = r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files'
 
 """-----------------------"""
 
-separatePointCSVfile(path,'1h_n2_fixed_points_withNames.csv').separate()
+# separatePointCSVfile(path,'1h_n2_fixed_points_withNames.csv').separate()
 # separatePointCSVfile(path+"\\separate files").merge()
 
 """------------------"""

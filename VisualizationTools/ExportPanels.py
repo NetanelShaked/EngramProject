@@ -43,11 +43,14 @@ def exportPanelResults(image_path, csv_path, channel, distance=500, img_name=Non
         x_pixel = int(row['x'])
         y_pixel = int(abs(row['y']))
         plt.subplot(plotsize, plotsize, idx + 1)
+
         plt.title(
             str(x_pixel) + "," + str(y_pixel) + " min " + "{:.2f}".format(
                 int(row['minor radius']) * pixel_to_micrometer) + " max " + "{:.2f}".format(
                 int(row['major radius']) * pixel_to_micrometer))
+
         # plt.title(str(x_pixel) + " , " + str(y_pixel)+" region : "+str(row['region']))
+
         plt.imshow(image[y_pixel - distance:y_pixel + distance,
                    x_pixel - distance:x_pixel + distance, channel])
         if drow_treangle:
@@ -94,6 +97,7 @@ def export3ChannelsPanelResults(image_path, csv_path, distance=500, img_name=Non
         plt.title(
             "min " + "{:.2f}".format(int(row['minor radius']) * pixel_to_mictoMeter) + " max " + "{:.2f}".format(
                 int(row['major radius']) * pixel_to_mictoMeter))
+        # plt.title("CFOS")
         plt.imshow(image[y_pixel - distance:y_pixel + distance,
                    x_pixel - distance:x_pixel + distance, 1])
         ax = plt.gca()
@@ -120,3 +124,9 @@ def export3ChannelsPanelResults(image_path, csv_path, distance=500, img_name=Non
     if img_name is None:
         img_name = csv_path.split('\\')[-1][:-4]
     plt.savefig(img_name)
+
+if __name__ == '__main__':
+    path=r'D:\Lab\סלייס נסיון קונפוקל-20210505T154605Z-001\סלייס נסיון קונפוקל\there_test'
+    image_path=r'C:\Users\shako\Desktop\test_2.jp2'
+    csv_path=os.path.join(path,'test_points_withNames.csv')
+    export3ChannelsPanelResults(image_path,csv_path,number_of_examples=100,distance=100,img_name="checking")

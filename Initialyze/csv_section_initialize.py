@@ -43,7 +43,8 @@ class Initialize_CSV_Files:
         if is_main_csv == 1:
             csv_data_file[csv_data_file['Unnamed: 0'] == 'NeuN_region_check'].to_csv(self.path + "\\NeuN_Background.csv",
                                                                                      index=False)
-            csv_data_file = csv_data_file[csv_data_file['Unnamed: 0'] == "DAPI"]
+            csv_data_file = csv_data_file[csv_data_file['Unnamed: 0'] == "Colocalization_cfos_neun"]
+            # csv_data_file = csv_data_file[csv_data_file['Unnamed: 0'] == "DAPI"]
             # csv_data_file = csv_data_file[csv_data_file['strength'] >= 9]
         csv_data_file = csv_data_file[csv_data_file['id'] != 0]
 

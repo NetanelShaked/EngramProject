@@ -90,12 +90,14 @@ def checkPositiveCfos(image, x_coordinate, y_coordinate, distance):
     x_pixel = x_coordinate
     y_pixel = y_coordinate
     kernel = np.ones((5, 5), np.uint8)
+    std_factor = 4
+
     image_cfos_channel = image[y_pixel - distance:y_pixel + distance,
                          x_pixel - distance:x_pixel + distance, 1]
 
     image_cfos_channel_without_outlines = image_cfos_channel[image_cfos_channel > 0]
-    threshold = image_cfos_channel_without_outlines.mean() + 1.5 * image_cfos_channel_without_outlines.std()
-    # threshold = otsu(image_cfos_channel_without_outlines)
+    threshold = image_cfos_channel_without_outlines.mean() + std_factor * image_cfos_channel_without_outlines.std()
+    # threshold = otsu(image_cfos_channel_without_outlines) + image_cfos_channel_without_outlines.std() * std_factor
 
     image = image_cfos_channel > threshold
     image = cv2.morphologyEx(np.float32(image), cv2.MORPH_CLOSE, kernel)
@@ -146,7 +148,7 @@ def parallelize(data, image_as_array, func, num_of_processes=multiprocessing.cpu
     return data
 
 
-def filter_nucleus_by_cfos(path, jp2_name, csv_name):
+def filter_nucleus_by_cfos(result_path, jp2_name_path, csv_name_path):
     """
 
     :param path: path to jp2 and csv files
@@ -155,8 +157,8 @@ def filter_nucleus_by_cfos(path, jp2_name, csv_name):
     :return: create new csv file in folder "cfos_filtered" for each bregma sent to this function
     """
     Image.MAX_IMAGE_PIXELS = 10 ** 9
-    csv = pd.read_csv(os.path.join(path, csv_name))
-    jp2_image = plt.imread(os.path.join(path, jp2_name))
+    csv = pd.read_csv(csv_name_path)
+    jp2_image = plt.imread(image_path)
     relevant = parallelize(csv, jp2_image, bridgeForParallelize)
     csv['relevent'] = relevant['relevent'].values
     csv['region_prop'] = relevant['region_prop'].values
@@ -170,26 +172,29 @@ def filter_nucleus_by_cfos(path, jp2_name, csv_name):
             # one_res=csv[csv['region_prop']==region_prop].values[0]
             csv.drop(index=csv[csv['region_prop'] == region_prop].index[1:], inplace=True)
             # csv=csv.append(one_res,ignore_index=True)
-    csv['minor radius']=[i[1] for i in csv['region_prop'].values]
-    csv['major radius']=[i[2] for i in csv['region_prop'].values]
+    csv['minor radius'] = [i[1] for i in csv['region_prop'].values]
+    csv['major radius'] = [i[2] for i in csv['region_prop'].values]
     del csv['region_prop']
     try:
-        os.mkdir(os.path.join(path, "cfos_filtered"))
+        os.mkdir(os.path.join(result_path, "cfos_filtered"))
     except FileExistsError:
         pass
 
-    csv.to_csv(os.path.join(os.path.join(path, "cfos_filtered"), csv_name[:-4] + "_without_neunFilter_1_5std.csv"), index=False)
+    csv_name = csv_name_path.split('\\')[-1]
+    csv.to_csv(os.path.join(os.path.join(result_path, "cfos_filtered"), csv_name[:-4] + "_4_std.csv"), index=False)
 
 
 if __name__ == '__main__':
-
     Image.MAX_IMAGE_PIXELS = 10 ** 9
     # someplayswithpic(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.jp2')
+    image_path = r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.jp2'
+    csv_path = r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files\separate files\cfos_filtered\-1255_try_4_std.csv'
+    # csv_path = r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files\separate files\NeunFilter\-1255_try2_5std.csv'
+    # csv_path = r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255_try.csv'
+    result_path = r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files\separate files'
 
-    # filter_nucleus_by_cfos(r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files','-1255.jp2','-1255.csv')
+    # filter_nucleus_by_cfos(result_path,image_path,csv_path)
 
-    image_path = r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\-1255.jp2'
-    csv_path = r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files\cfos_filtered\-1255_without_neunFilter_3std.csv'
-
-    # export3ChannelsPanelResults(image_path,csv_path,img_name="-1255_3std.jpg",distance=300)
-    exportPanelResults(image_path, csv_path, 1, 300, "3std_cfos_without_neun_filter.jpg", drow_treangle=True,number_of_examples=500)
+    #
+    export3ChannelsPanelResults(image_path, csv_path, img_name="-1255_4_std.jpg", distance=300, number_of_examples=60)
+    # exportPanelResults(image_path, csv_path, 0, 300, "NeuN_example.jpg", drow_treangle=True,number_of_examples=500)

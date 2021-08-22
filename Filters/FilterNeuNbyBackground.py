@@ -57,11 +57,13 @@ def filter_NeuN_by_background(path, jp2_name, csv_name):
     image = plt.imread(path + "//" + jp2_name)
     csv = pd.read_csv(path + "//" + csv_name)
 
-    interest_region = pd.read_csv(r'C:\Users\shako\Desktop\מעבדה\interest _regions.csv')
+    interest_region = pd.read_csv(r'D:\Lab\interest _regions.csv')
     interest_region = interest_region[interest_region['Relevant'] == 'x']
     interest_region = interest_region['id']
 
+
     csv = csv[csv['id'].isin(interest_region)]
+    print(len(csv))
     # new_csv = parallelize(csv, image, getmasho)
     csv['relevant'] = parallelize(csv, image, handle_df)
     # new_csv.to_csv(r'C:\Users\shako\Desktop\try1.csv', index=False)
@@ -100,18 +102,20 @@ def decision(image, x_coordinate, y_coordinate, distance):
     pixel_value = image[y_coordinate, x_coordinate, channel]
     # pixel_value = image[y_coordinate - neun_pixel_radius:y_coordinate + neun_pixel_radius,
     #               x_coordinate - neun_pixel_radius:x_coordinate + neun_pixel_radius, channel].mean()
-    limit_addition = std
+    # limit_addition = std
+    limit_addition = 0
 
     if std < 1:  # in case there is no NeuN in local area
         return False
 
     if limit <= 10:  # close to the end of the brain
-        limit_addition *= 1.5
+        # limit_addition *= 1.5
+        limit_addition = std
 
     threshold = limit + limit_addition
 
-    if std < 3.5:  # low density in local image
-        threshold = limit + 2 * limit_addition
+    # if std < 4:  # low density in local image
+    #     threshold = limit + 2 * limit_addition
 
     if std > 6.5:  # in case there is high density in local image
         threshold = limit + 0.5 * limit_addition
@@ -146,7 +150,7 @@ def getmasho(data):
 
 
 if __name__ == '__main__':
-    path = r'C:\Users\shako\Downloads\N2-20210214T082519Z-012\N2\1h\csv files\separate files'
+    path = r'D:\Lab\Data_from_lab\N2-20210214T082519Z-012\N2\1h\csv files\separate files'
     jp2 = '-1255.jp2'
     csv = '-1255.csv'
     Image.MAX_IMAGE_PIXELS = 10 ** 9
